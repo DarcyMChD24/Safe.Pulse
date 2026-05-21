@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SafePulse – Plataforma Unificada de Seguridad</title>
+<meta name="description" content="SafePulse: Chat, reportes, alertas de emergencia, reseñas y multimedia integrados en una sola plataforma de seguridad ciudadana.">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:          #0a0c10;
+  --bg2:         #111318;
+  --bg3:         #181c22;
+  --bg4:         #1e2330;
+  --border:      rgba(255,255,255,0.07);
+  --border2:     rgba(255,255,255,0.12);
+  --gold:        #f5c518;
+  --gold2:       #d4a800;
+  --gold-glow:   rgba(245,197,24,0.35);
+  --red:         #e53935;
+  --red2:        #c62828;
+  --red-glow:    rgba(229,57,53,0.45);
+  --green:       #43a047;
+  --blue:        #1565c0;
+  --blue2:       #1e88e5;
+  --orange:      #f57c00;
+  --text:        #f0f2f5;
+  --muted:       #7a8090;
+  --muted2:      #4a5060;
+  --chat-out:    #1a2535;
+  --chat-in:     #1565c0;
+  --radius:      16px;
+  --radius-sm:   10px;
+  --nav-h:       70px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #000;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PHONE SHELL
+═══════════════════════════════════════════════════════ */
+.phone {
+  width: 390px;
+  height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 420px) {
+  .phone { width: 100vw; height: 100dvh; }
+}
+@media (min-width: 421px) {
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px 0;
+    background: #050608;
+  }
+  .phone {
+    border-radius: 40px;
+    border: 1px solid #1a1d24;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04),
+      0 0 60px rgba(229,57,53,0.12),
+      0 40px 100px rgba(0,0,0,0.9);
+  }
+}
+
+/* ── TOP STATUS BAR ── */
+.status-bar-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px 6px;
+  font-size: 11px; font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.status-time { font-size: 13px; font-weight: 700; color: var(--text); }
+.status-icons { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+/* ── HEADER ── */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 16px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.header-logo { display: flex; align-items: center; gap: 8px; }
+.logo-badge {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 14px var(--gold-glow);
+}
+.logo-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 21px; font-weight: 700; letter-spacing: 0.5px;
+}
+.logo-name span { color: var(--gold); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.hdr-btn {
+  width: 34px; height: 34px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 9px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: background 0.2s;
+  position: relative;
+}
+.hdr-btn:hover { background: var(--bg4); }
+.hdr-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 16px; height: 16px;
+  background: var(--red); border-radius: 8px;
+  border: 2px solid var(--bg);
+  font-size: 8px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABS CONTENT AREA
+═══════════════════════════════════════════════════════ */
+.tabs-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.tab-panel {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+  scrollbar-width: none;
+}
+.tab-panel::-webkit-scrollbar { display: none; }
+.tab-panel.active { opacity: 1; pointer-events: auto; }
+
+/* ═══════════════════════════════════════════════════════
+   BOTTOM NAVIGATION
+═══════════════════════════════════════════════════════ */
+.bottom-nav {
+  height: var(--nav-h);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer;
+  opacity: 0.45; transition: opacity 0.2s;
+  position: relative;
+}
+.nav-item.active { opacity: 1; }
+.nav-icon { font-size: 20px; position: relative; }
+.nav-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.nav-item.active .nav-label { color: var(--gold); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 4px rgba(245,197,24,0.5)); }
+.nav-dot {
+  position: absolute; top: -2px; right: -6px;
+  width: 9px; height: 9px;
+  background: var(--red); border-radius: 50%;
+  border: 2px solid var(--bg2);
+  animation: blink-dot 1.4s ease-in-out infinite;
+}
+@keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ═══════════════════════════════════════════════════════
+   TAB 1 – INICIO / HOME
+═══════════════════════════════════════════════════════ */
+.home-panel { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Alert banner */
+.alert-banner {
+  background: linear-gradient(135deg, #1a0000, #2a0000);
+  border: 1.5px solid rgba(229,57,53,0.5);
+  border-radius: 14px;
+  padding: 14px 14px;
+  display: flex; align-items: center; gap: 12px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 20px rgba(229,57,53,0.2);
+  animation: bannerPulse 2.5s ease-in-out infinite;
+}
+@keyframes bannerPulse {
+  0%,100%{ box-shadow: 0 0 15px rgba(229,57,53,0.15); }
+  50%    { box-shadow: 0 0 35px rgba(229,57,53,0.35); }
+}
+.alert-banner-icon { font-size: 28px; animation: ring 1s ease-in-out infinite; flex-shrink:0; }
+@keyframes ring {
+  0%,100%{ transform: rotate(-8deg); }
+  25%{ transform: rotate(8deg); }
+  50%{ transform: rotate(-5deg); }
+  75%{ transform: rotate(5deg); }
+}
+.alert-banner-text h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px;
+}
+.alert-banner-text p { font-size: 10.5px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.alert-count-badge {
+  margin-left: auto;
+  background: var(--red); color: #fff;
+  font-size: 11px; font-weight: 800;
+  padding: 4px 10px; border-radius: 20px;
+  flex-shrink: 0;
+}
+
+/* SOS Button */
+.sos-section {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 4px 0;
+}
+.sos-btn-wrap { position: relative; }
+.sos-btn {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ff5252, #c62828);
+  border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  box-shadow:
+    0 0 0 10px rgba(198,40,40,0.16),
+    0 0 0 22px rgba(198,40,40,0.08),
+    0 6px 28px rgba(198,40,40,0.55);
+  animation: sosPulse 2.2s ease-in-out infinite;
+  transition: transform 0.15s;
+}
+.sos-btn:active { transform: scale(0.95); }
+@keyframes sosPulse {
+  0%,100%{ box-shadow: 0 0 0 10px rgba(198,40,40,0.16), 0 0 0 22px rgba(198,40,40,0.08), 0 6px 28px rgba(198,40,40,0.5); }
+  50%    { box-shadow: 0 0 0 14px rgba(198,40,40,0.22), 0 0 0 30px rgba(198,40,40,0.07), 0 6px 40px rgba(198,40,40,0.65); }
+}
+.sos-icon { font-size: 28px; }
+.sos-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 1.5px;
+}
+.sos-sub { font-size: 10px; color: rgba(255,255,255,0.7); }
+
+/* Mini map */
+.mini-map-card {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  height: 120px; position: relative; overflow: hidden;
+}
+.mini-map-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.map-pin-center {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-60%);
+  font-size: 22px;
+  filter: drop-shadow(0 0 8px rgba(229,57,53,0.8));
+  animation: pinPop 1.5s ease-in-out infinite;
+}
+@keyframes pinPop { 0%,100%{transform:translate(-50%,-60%) scale(1);} 50%{transform:translate(-50%,-65%) scale(1.1);} }
+.map-ripple-c {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  border: 1.5px solid rgba(229,57,53,0.5); border-radius: 50%;
+  animation: mapRipple 2s ease-out infinite;
+}
+.map-ripple-c:nth-child(2){ animation-delay:0.7s; }
+.map-ripple-c:nth-child(3){ animation-delay:1.4s; }
+@keyframes mapRipple {
+  0%  { width:20px; height:20px; opacity:0.9; }
+  100%{ width:80px; height:80px; opacity:0; }
+}
+.map-loc-info {
+  position: absolute; bottom:8px; left:10px;
+  background: rgba(0,0,0,0.8); border: 1px solid #222;
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 9.5px;
+}
+.map-loc-info strong { display: block; font-size: 8.5px; color: var(--muted); letter-spacing: 1px; margin-bottom: 1px; }
+
+/* Quick action cards */
+.quick-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.quick-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; transition: all 0.2s;
+  text-align: center;
+}
+.quick-card:hover { background: var(--bg3); border-color: var(--border2); }
+.quick-card-icon { font-size: 22px; }
+.quick-card-label { font-size: 10px; font-weight: 600; color: var(--muted); }
+.quick-card.red-card { border-color: rgba(229,57,53,0.25); }
+.quick-card.red-card:hover { border-color: rgba(229,57,53,0.5); }
+
+/* Nearby users section */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.section-title-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.8px; color: var(--gold);
+  display: flex; align-items: center; gap: 6px;
+}
+.section-see-all { font-size: 10px; color: var(--muted); cursor: pointer; }
+
+.contact-list { display: flex; flex-direction: column; gap: 6px; }
+.contact-item {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.contact-ava {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg3); border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; position: relative;
+}
+.contact-online {
+  position: absolute; bottom:0; right:0;
+  width:9px; height:9px; background: var(--green);
+  border-radius: 50%; border: 2px solid var(--bg2);
+}
+.contact-info { flex: 1; min-width: 0; }
+.contact-name { font-size: 12px; font-weight: 600; }
+.contact-status { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.contact-action {
+  font-size: 18px; cursor: pointer; color: var(--muted);
+  transition: color 0.2s;
+}
+.contact-action:hover { color: var(--gold); }
+
+/* ═══════════════════════════════════════════════════════
+   TAB 2 – CHAT UNIFICADO
+═══════════════════════════════════════════════════════ */
+.chat-panel {
+  display: flex; flex-direction: column; height: 100%;
+  padding-bottom: 0;
+}
+
+/* Chat header */
+.chat-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0; background: var(--bg);
+}
+.chat-bot-ava {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.chat-bot-info { flex: 1; }
+.chat-bot-name { font-size: 13px; font-weight: 700; }
+.chat-bot-status { font-size: 9px; color: var(--green); display: flex; align-items: center; gap: 4px; }
+.chat-bot-status::before { content:''; width:6px; height:6px; background: var(--green); border-radius:50%; flex-shrink:0; }
+.chat-actions-row { display: flex; gap: 6px; }
+.chat-act-btn {
+  width: 30px; height: 30px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer;
+}
+
+/* Messages list */
+.messages-list {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+  scrollbar-width: none;
+}
+.messages-list::-webkit-scrollbar { display: none; }
+
+.msg-group { display: flex; flex-direction: column; gap: 4px; }
+
+.msg-row {
+  display: flex; align-items: flex-end; gap: 6px;
+}
+.msg-row.outgoing { flex-direction: row-reverse; }
+
+.msg-ava-sm {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+
+.msg-bubble {
+  max-width: 76%;
+  background: var(--bg3);
+  border-radius: 4px 12px 12px 12px;
+  padding: 8px 10px;
+  position: relative;
+}
+.msg-row.outgoing .msg-bubble {
+  background: var(--chat-in);
+  border-radius: 12px 4px 12px 12px;
+}
+.msg-bubble.system-bubble {
+  background: linear-gradient(135deg, #1a1200, #222800);
+  border: 1px solid rgba(245,197,24,0.2);
+  border-radius: 10px; max-width: 88%; align-self: center;
+}
+.msg-sender { font-size: 9px; font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+.msg-row.outgoing .msg-sender { color: #90caf9; }
+.msg-text { font-size: 11.5px; color: rgba(255,255,255,0.88); line-height: 1.45; }
+.msg-time { font-size: 8px; color: rgba(255,255,255,0.35); text-align: right; margin-top: 3px; }
+
+/* Media bubbles */
+.media-bubble {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; max-width: 72%;
+  cursor: pointer; position: relative;
+}
+.media-bubble img {
+  width: 100%; max-height: 130px; object-fit: cover; display: block;
+}
+.media-bubble-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.audio-bubble {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 22px; padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+  max-width: 72%;
+}
+.audio-play-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue); display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer; flex-shrink: 0;
+  border: none; color: #fff; transition: background 0.2s;
+}
+.audio-play-btn:hover { background: var(--blue2); }
+.audio-waveform {
+  flex: 1; display: flex; align-items: center; gap: 2px; height: 24px;
+}
+.audio-bar {
+  width: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.3);
+  animation: audioWave 0.8s ease-in-out infinite;
+}
+.audio-bar:nth-child(1){ height:8px; animation-delay:0s; }
+.audio-bar:nth-child(2){ height:14px; animation-delay:0.1s; }
+.audio-bar:nth-child(3){ height:20px; animation-delay:0.2s; }
+.audio-bar:nth-child(4){ height:12px; animation-delay:0.3s; }
+.audio-bar:nth-child(5){ height:18px; animation-delay:0.4s; }
+.audio-bar:nth-child(6){ height:8px; animation-delay:0.5s; }
+.audio-bar:nth-child(7){ height:16px; animation-delay:0.6s; }
+@keyframes audioWave {
+  0%,100%{ opacity:0.35; transform:scaleY(1); }
+  50%    { opacity:1; transform:scaleY(1.3); }
+}
+.audio-duration { font-size: 10px; color: var(--muted); }
+
+.location-bubble {
+  background: #0d1a2d; border: 1px solid rgba(33,150,243,0.3);
+  border-radius: 12px; padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px; max-width: 80%;
+  cursor: pointer;
+}
+.location-map-thumb {
+  width: 48px; height: 42px; background: #081422;
+  border-radius: 8px; border: 1px solid rgba(33,150,243,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  flex-shrink: 0;
+}
+.location-bubble-info .loc-title { font-size: 10.5px; font-weight: 600; color: #64b5f6; }
+.location-bubble-info .loc-addr { font-size: 9.5px; color: var(--muted); margin-top: 2px; }
+
+/* Attachment preview */
+.attachment-preview {
+  display: none; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg2); border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.attachment-preview.show { display: flex; }
+.att-thumb {
+  width: 42px; height: 42px; background: var(--bg3);
+  border-radius: 8px; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; overflow: hidden;
+}
+.att-thumb img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+.att-info { flex: 1; min-width: 0; }
+.att-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-size { font-size: 9.5px; color: var(--muted); }
+.att-remove { font-size: 18px; color: var(--muted); cursor: pointer; transition: color 0.2s; }
+.att-remove:hover { color: var(--red); }
+
+/* Input bar */
+.chat-input-bar {
+  padding: 8px 10px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.media-btns-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+  overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+}
+.media-btns-row::-webkit-scrollbar { display: none; }
+.media-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 6px 10px;
+  cursor: pointer; flex-shrink: 0;
+  transition: all 0.2s; font-size: 18px;
+}
+.media-btn span { font-size: 8px; color: var(--muted); font-weight: 600; }
+.media-btn:hover { background: var(--bg4); border-color: var(--border2); }
+.media-btn.emergency-btn-media {
+  border-color: rgba(229,57,53,0.4);
+  background: rgba(229,57,53,0.08);
+}
+.media-btn.emergency-btn-media:hover { background: rgba(229,57,53,0.18); }
+.media-btn.loc-btn-media {
+  border-color: rgba(33,150,243,0.4);
+  background: rgba(33,150,243,0.08);
+}
+.media-btn.loc-btn-media:hover { background: rgba(33,150,243,0.18); }
+
+.input-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.chat-input-wrap {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 22px; padding: 8px 14px;
+  transition: border-color 0.2s;
+}
+.chat-input-wrap:focus-within { border-color: rgba(255,255,255,0.2); }
+.chat-input-field {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text);
+  caret-color: var(--gold);
+}
+.chat-input-field::placeholder { color: var(--muted2); }
+.send-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff; flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 10px rgba(21,101,192,0.4);
+}
+.send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 14px rgba(21,101,192,0.5); }
+.send-btn:active { transform: scale(0.95); }
+
+/* Hidden file inputs */
+.hidden-input { display: none; }
+
+/* ═══════════════════════════════════════════════════════
+   TAB 3 – REPORTES
+═══════════════════════════════════════════════════════ */
+.reports-panel { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+.reporter-form-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+.form-card-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.form-card-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(229,57,53,0.15); border: 1px solid rgba(229,57,53,0.3);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.form-card-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+}
+.form-card-sub { font-size: 9.5px; color: var(--muted); }
+
+.form-field { margin-bottom: 10px; }
+.form-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 5px; display: block;
+}
+.form-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 0 12px; height: 42px;
+  transition: border-color 0.2s;
+}
+.form-input-wrap:focus-within { border-color: rgba(245,197,24,0.5); }
+.form-input-icon { font-size: 14px; flex-shrink: 0; }
+.form-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text);
+  caret-color: var(--gold);
+}
+.form-input::placeholder { color: var(--muted2); }
+select.form-input { cursor: pointer; }
+select.form-input option { background: #181c22; }
+
+.form-select-wrap {
+  background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 0 12px; height: 42px;
+  display: flex; align-items: center; gap: 10px;
+  transition: border-color 0.2s;
+}
+.form-select-wrap:focus-within { border-color: rgba(245,197,24,0.5); }
+.form-select {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text);
+  cursor: pointer; appearance: none;
+}
+.form-select option { background: #181c22; color: #fff; }
+
+.form-textarea-wrap {
+  background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+.form-textarea-wrap:focus-within { border-color: rgba(245,197,24,0.5); }
+.form-textarea {
+  width: 100%; background: transparent; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text);
+  resize: none; min-height: 60px;
+  caret-color: var(--gold);
+}
+.form-textarea::placeholder { color: var(--muted2); }
+
+.form-media-attach {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.attach-btn {
+  flex: 1; padding: 10px; background: var(--bg3);
+  border: 1.5px dashed var(--border2); border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 10px; color: var(--muted); font-weight: 600;
+}
+.attach-btn:hover { border-color: var(--gold); color: var(--gold); }
+.attach-btn-icon { font-size: 20px; }
+
+.submit-report-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--red2), var(--red));
+  border: none; border-radius: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #fff;
+  cursor: pointer; margin-top: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 18px rgba(229,57,53,0.4);
+  transition: all 0.2s;
+}
+.submit-report-btn:hover {
+  box-shadow: 0 6px 24px rgba(229,57,53,0.55);
+  transform: translateY(-1px);
+}
+.submit-report-btn:active { transform: translateY(1px); }
+
+/* Report history */
+.report-history-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.report-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.report-item:last-child { border-bottom: none; padding-bottom: 0; }
+.report-status-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+}
+.s-enviado { background: #f57c00; }
+.s-proceso { background: var(--blue2); }
+.s-atendido { background: var(--green); }
+.report-item-info { flex: 1; min-width: 0; }
+.report-item-title { font-size: 11.5px; font-weight: 600; }
+.report-item-meta { font-size: 9.5px; color: var(--muted); margin-top: 3px; }
+.report-status-badge {
+  font-size: 8.5px; font-weight: 700; padding: 2px 7px; border-radius: 5px;
+  flex-shrink: 0;
+}
+.sb-enviado { background: rgba(245,124,0,0.2); color: #f57c00; border: 1px solid rgba(245,124,0,0.3); }
+.sb-proceso { background: rgba(30,136,229,0.2); color: #64b5f6; border: 1px solid rgba(30,136,229,0.3); }
+.sb-atendido { background: rgba(67,160,71,0.2); color: #81c784; border: 1px solid rgba(67,160,71,0.3); }
+
+/* ═══════════════════════════════════════════════════════
+   TAB 4 – RESEÑAS
+═══════════════════════════════════════════════════════ */
+.reviews-panel { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.zone-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.zone-card-header {
+  padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+}
+.zone-card-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0;
+}
+.zone-icon-red { background: rgba(229,57,53,0.15); border: 1px solid rgba(229,57,53,0.3); }
+.zone-icon-orange { background: rgba(245,124,0,0.15); border: 1px solid rgba(245,124,0,0.3); }
+.zone-icon-green { background: rgba(67,160,71,0.15); border: 1px solid rgba(67,160,71,0.3); }
+.zone-card-info { flex: 1; min-width: 0; }
+.zone-card-name { font-size: 13px; font-weight: 700; }
+.zone-card-addr { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.zone-risk-badge {
+  font-size: 9px; font-weight: 800; padding: 3px 9px; border-radius: 6px;
+  flex-shrink: 0;
+}
+.risk-alto { background: rgba(229,57,53,0.2); color: #ff6b6b; border: 1px solid rgba(229,57,53,0.4); }
+.risk-medio { background: rgba(245,124,0,0.2); color: #ffaa44; border: 1px solid rgba(245,124,0,0.4); }
+.risk-bajo { background: rgba(67,160,71,0.2); color: #81c784; border: 1px solid rgba(67,160,71,0.4); }
+
+.zone-card-footer {
+  padding: 8px 14px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.stars-display { display: flex; gap: 3px; }
+.star { font-size: 13px; color: var(--muted2); transition: color 0.15s; }
+.star.filled { color: var(--gold); }
+.zone-count-text { font-size: 10px; color: var(--muted); }
+.rate-zone-btn {
+  background: transparent; border: 1.5px solid var(--gold);
+  border-radius: 8px; padding: 6px 12px;
+  font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700;
+  color: var(--gold); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.2s;
+}
+.rate-zone-btn:hover { background: rgba(245,197,24,0.1); }
+
+/* Reviews modal */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(6,8,12,0.88); backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: flex-end;
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.modal-sheet {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 32px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+  display: flex; flex-direction: column; gap: 14px;
+  max-height: 80%;
+  overflow-y: auto; scrollbar-width: none;
+}
+.modal-sheet::-webkit-scrollbar { display: none; }
+.modal-overlay.show .modal-sheet { transform: translateY(0); }
+.modal-drag { width: 40px; height: 4px; background: var(--border2); border-radius: 4px; margin: 0 auto -4px; }
+.modal-title-row { display: flex; align-items: center; justify-content: space-between; }
+.modal-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px;
+}
+.modal-close-btn {
+  width: 28px; height: 28px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer; color: var(--muted); transition: color 0.2s;
+}
+.modal-close-btn:hover { color: #fff; }
+.modal-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+}
+.stars-interactive { display: flex; gap: 6px; font-size: 26px; cursor: pointer; }
+.star-i { color: var(--muted2); transition: all 0.15s; }
+.star-i.active { color: var(--gold); text-shadow: 0 0 8px rgba(245,197,24,0.4); }
+.modal-input {
+  width: 100%; background: var(--bg3); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 14px;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: rgba(245,197,24,0.5); }
+.modal-submit-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  border: none; border-radius: 12px;
+  font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+  letter-spacing: 1px; color: #000; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(245,197,24,0.3);
+  transition: all 0.2s;
+}
+.modal-submit-btn:hover { box-shadow: 0 6px 24px rgba(245,197,24,0.45); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════
+   TAB 5 – ALERTAS
+═══════════════════════════════════════════════════════ */
+.alerts-panel { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.alert-filters {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+}
+.alert-filters::-webkit-scrollbar { display: none; }
+.filter-chip {
+  padding: 5px 13px; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; font-size: 10px; font-weight: 600; cursor: pointer;
+  flex-shrink: 0; transition: all 0.2s; white-space: nowrap; color: var(--muted);
+}
+.filter-chip.active {
+  background: rgba(229,57,53,0.15); border-color: rgba(229,57,53,0.5);
+  color: #ff6b6b;
+}
+
+.alert-feed { display: flex; flex-direction: column; gap: 8px; }
+
+.alert-item {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s;
+}
+.alert-item.critical {
+  border-color: rgba(229,57,53,0.4);
+  background: linear-gradient(135deg, #150000, #1a0505);
+  animation: alertItemPulse 2s ease-in-out infinite;
+}
+@keyframes alertItemPulse {
+  0%,100%{ box-shadow: 0 0 0 0 rgba(229,57,53,0); }
+  50%    { box-shadow: 0 0 0 3px rgba(229,57,53,0.12); }
+}
+.alert-item-header { display: flex; align-items: flex-start; gap: 10px; }
+.alert-type-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.atype-sos { background: rgba(229,57,53,0.2); border: 1px solid rgba(229,57,53,0.4); }
+.atype-fire { background: rgba(255,87,34,0.2); border: 1px solid rgba(255,87,34,0.4); }
+.atype-theft { background: rgba(245,124,0,0.2); border: 1px solid rgba(245,124,0,0.4); }
+.atype-medical { background: rgba(67,160,71,0.2); border: 1px solid rgba(67,160,71,0.4); }
+.alert-item-meta { flex: 1; min-width: 0; }
+.alert-item-type {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--red); margin-bottom: 2px;
+}
+.alert-item-desc { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.alert-item-time { font-size: 9.5px; color: var(--muted); }
+.alert-priority-badge {
+  padding: 2px 8px; border-radius: 5px;
+  font-size: 8px; font-weight: 800; flex-shrink: 0;
+}
+.priority-alta { background: rgba(229,57,53,0.2); color: #ff6b6b; border: 1px solid rgba(229,57,53,0.4); }
+.priority-media { background: rgba(245,124,0,0.2); color: #ffaa44; border: 1px solid rgba(245,124,0,0.4); }
+.priority-baja { background: rgba(67,160,71,0.2); color: #81c784; border: 1px solid rgba(67,160,71,0.4); }
+
+.alert-item-loc {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3); border-radius: 8px; padding: 7px 10px;
+  font-size: 10px; color: var(--muted);
+}
+.alert-item-actions { display: flex; gap: 8px; }
+.alert-action-btn {
+  flex: 1; padding: 8px; border-radius: 8px; border: none;
+  font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.alert-action-respond {
+  background: var(--red); color: #fff;
+  box-shadow: 0 2px 10px rgba(229,57,53,0.3);
+}
+.alert-action-respond:hover { box-shadow: 0 4px 14px rgba(229,57,53,0.45); }
+.alert-action-view {
+  background: var(--bg3); color: var(--text);
+  border: 1px solid var(--border);
+}
+.alert-action-view:hover { background: var(--bg4); }
+
+/* ═══════════════════════════════════════════════════════
+   SOS MODAL (Reporter Form)
+═══════════════════════════════════════════════════════ */
+.sos-modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.92); backdrop-filter: blur(10px);
+  display: flex; justify-content: center; align-items: flex-end;
+  z-index: 900; opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.sos-modal-overlay.show { opacity: 1; pointer-events: auto; }
+.sos-modal-sheet {
+  width: 100%; background: #0e1014;
+  border: 1px solid rgba(229,57,53,0.4);
+  border-radius: 28px 28px 0 0;
+  padding: 20px 20px 36px;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  display: flex; flex-direction: column; gap: 12px;
+  max-height: 90%; overflow-y: auto; scrollbar-width: none;
+  box-shadow: 0 -20px 60px rgba(229,57,53,0.2);
+}
+.sos-modal-sheet::-webkit-scrollbar { display: none; }
+.sos-modal-overlay.show .sos-modal-sheet { transform: translateY(0); }
+
+.sos-modal-header {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.sos-modal-icon-wrap {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: radial-gradient(circle, #ff5252, #c62828);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 0 8px rgba(198,40,40,0.12), 0 0 30px rgba(229,57,53,0.4);
+  animation: sosPulse 2s ease-in-out infinite;
+}
+.sos-modal-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: 1.5px; color: #fff;
+}
+.sos-modal-sub { font-size: 11px; color: var(--muted); text-align: center; }
+
+.sos-section-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(229,57,53,0.9); text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: -2px; margin-top: 4px;
+}
+.sos-section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(229,57,53,0.2);
+}
+
+.sos-form-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 0 12px; height: 44px;
+  transition: border-color 0.2s;
+}
+.sos-form-input-wrap:focus-within { border-color: rgba(229,57,53,0.5); }
+.sos-form-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text);
+  caret-color: var(--red);
+}
+.sos-form-input::placeholder { color: rgba(255,255,255,0.25); }
+select.sos-form-input { cursor: pointer; appearance: none; }
+select.sos-form-input option { background: #1a0000; }
+
+.sos-confirm-btn {
+  width: 100%; padding: 15px;
+  background: radial-gradient(ellipse, #ff5252, #c62828);
+  border: none; border-radius: 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 17px; font-weight: 700; letter-spacing: 2px; color: #fff;
+  cursor: pointer; margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 6px 28px rgba(229,57,53,0.5);
+  transition: all 0.2s;
+  animation: sosPulse 2s ease-in-out infinite;
+}
+.sos-confirm-btn:hover { box-shadow: 0 8px 36px rgba(229,57,53,0.65); transform: translateY(-1px); }
+
+.sos-cancel-link {
+  text-align: center; font-size: 11px; color: var(--muted);
+  cursor: pointer; padding: 4px;
+}
+.sos-cancel-link:hover { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   EMERGENCY OVERLAY (Post-SOS)
+═══════════════════════════════════════════════════════ */
+.emergency-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(229,57,53,0.97) 0%, rgba(6,0,0,0.99) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  text-align: center; padding: 30px;
+}
+.emergency-overlay.show { opacity: 1; pointer-events: auto; }
+
+.ems-icon-ring {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,100,100,0.3), transparent);
+  border: 3px solid rgba(255,255,255,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; margin-bottom: 18px;
+  animation: emsRing 1.5s ease-in-out infinite;
+}
+@keyframes emsRing {
+  0%,100%{ box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
+  50%    { box-shadow: 0 0 0 18px rgba(255,255,255,0); }
+}
+.ems-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: 3px; color: #fff;
+  margin-bottom: 6px;
+}
+.ems-sub { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.5; margin-bottom: 22px; }
+
+.ems-status-row { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 24px; }
+.ems-status-item {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11.5px; font-weight: 600;
+}
+.ems-status-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; flex-shrink: 0; animation: blink-dot 1s ease-in-out infinite; }
+
+.ems-dismiss-btn {
+  background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 30px; padding: 12px 36px;
+  font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+  letter-spacing: 1px; color: #fff; cursor: pointer;
+  transition: all 0.2s;
+}
+.ems-dismiss-btn:hover { background: rgba(255,255,255,0.22); }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════════════════ */
+.toast-container {
+  position: absolute; top: 80px; left: 14px; right: 14px;
+  z-index: 800;
+  display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  opacity: 0; transform: translateY(-8px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast.error-toast { border-color: rgba(229,57,53,0.4); background: rgba(229,57,53,0.12); }
+.toast.success-toast { border-color: rgba(67,160,71,0.4); background: rgba(67,160,71,0.08); }
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-text { font-size: 11.5px; font-weight: 600; flex: 1; }
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+.divider { height: 1px; background: var(--border); margin: 2px 0; }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 30px 20px; text-align: center; color: var(--muted);
+}
+.empty-state-icon { font-size: 36px; }
+.empty-state-text { font-size: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="phone" id="phoneApp">
+
+  <!-- ══ TOP STATUS BAR ══ -->
+  <div class="status-bar-top">
+    <span class="status-time" id="statusTime">08:44</span>
+    <div class="status-icons">
+      <span>📶</span><span>🔋</span>
+    </div>
+  </div>
+
+  <!-- ══ APP HEADER ══ -->
+  <div class="app-header">
+    <div class="header-logo">
+      <div class="logo-badge">🛡️</div>
+      <div class="logo-name">Safe<span>Pulse</span></div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-btn" onclick="switchTab('alerts')">
+        🔔
+        <div class="hdr-badge" id="alertBadge">3</div>
+      </div>
+      <div class="hdr-btn" onclick="showToast('Perfil de usuario', 'info', '👤')">👤</div>
+    </div>
+  </div>
+
+  <!-- ══ TABS CONTENT ══ -->
+  <div class="tabs-content">
+
+    <!-- ▌ TAB 1: INICIO ▌ -->
+    <div class="tab-panel active" id="tab-home">
+      <div class="home-panel">
+
+        <!-- Active alert banner -->
+        <div class="alert-banner" id="homeBanner">
+          <div class="alert-banner-icon">🔔</div>
+          <div class="alert-banner-text">
+            <h3>3 ALERTAS ACTIVAS</h3>
+            <p>Hay emergencias reportadas en tu zona</p>
+          </div>
+          <div class="alert-count-badge" id="bannerCount">3</div>
+        </div>
+
+        <!-- SOS Button -->
+        <div class="sos-section">
+          <div class="sos-btn-wrap">
+            <button class="sos-btn" id="homeSOSBtn" onclick="openSOSModal()">
+              <span class="sos-icon">🚨</span>
+              <span class="sos-label">SOS</span>
+            </button>
+          </div>
+          <p class="sos-sub">Mantén presionado para activar emergencia</p>
+        </div>
+
+        <!-- Mini map -->
+        <div class="mini-map-card">
+          <div class="map-ripple-c"></div>
+          <div class="map-ripple-c"></div>
+          <div class="map-ripple-c"></div>
+          <div class="map-pin-center">📍</div>
+          <div class="map-loc-info">
+            <strong>UBICACIÓN ACTUAL</strong>
+            Av. Principal 123 · Precisión: Alta
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div>
+          <div class="section-head">
+            <div class="section-title-text">⚡ ACCIONES RÁPIDAS</div>
+          </div>
+          <div class="quick-grid">
+            <div class="quick-card red-card" onclick="switchTab('chat')">
+              <div class="quick-card-icon">💬</div>
+              <div class="quick-card-label">Chat Seguro</div>
+            </div>
+            <div class="quick-card red-card" onclick="switchTab('reports')">
+              <div class="quick-card-icon">📋</div>
+              <div class="quick-card-label">Hacer Reporte</div>
+            </div>
+            <div class="quick-card red-card" onclick="switchTab('reviews')">
+              <div class="quick-card-icon">⭐</div>
+              <div class="quick-card-label">Reseñas</div>
+            </div>
+            <div class="quick-card" onclick="callService('Policía','101')">
+              <div class="quick-card-icon">👮</div>
+              <div class="quick-card-label">Policía</div>
+            </div>
+            <div class="quick-card" onclick="callService('Bomberos','116')">
+              <div class="quick-card-icon">🚒</div>
+              <div class="quick-card-label">Bomberos</div>
+            </div>
+            <div class="quick-card" onclick="callService('Ambulancia','106')">
+              <div class="quick-card-icon">🚑</div>
+              <div class="quick-card-label">Ambulancia</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nearby contacts -->
+        <div>
+          <div class="section-head">
+            <div class="section-title-text">👥 CONTACTOS CERCANOS</div>
+            <div class="section-see-all">Ver todos</div>
+          </div>
+          <div class="contact-list">
+            <div class="contact-item">
+              <div class="contact-ava">👨<div class="contact-online"></div></div>
+              <div class="contact-info">
+                <div class="contact-name">Carlos Mendoza</div>
+                <div class="contact-status">📍 a 120m · Disponible</div>
+              </div>
+              <div class="contact-action" onclick="switchTab('chat')">💬</div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-ava">👩<div class="contact-online"></div></div>
+              <div class="contact-info">
+                <div class="contact-name">Ana García</div>
+                <div class="contact-status">📍 a 340m · Disponible</div>
+              </div>
+              <div class="contact-action" onclick="switchTab('chat')">💬</div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-ava">🧑</div>
+              <div class="contact-info">
+                <div class="contact-name">Luis Torres</div>
+                <div class="contact-status">📍 a 680m · Inactivo</div>
+              </div>
+              <div class="contact-action" onclick="switchTab('chat')">💬</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ▌ TAB 2: CHAT ▌ -->
+    <div class="tab-panel" id="tab-chat">
+      <div class="chat-panel">
+
+        <!-- Chat header -->
+        <div class="chat-header">
+          <div class="chat-bot-ava">🤖</div>
+          <div class="chat-bot-info">
+            <div class="chat-bot-name">SafePulse Asistente</div>
+            <div class="chat-bot-status">En línea · Chat + Multimedia</div>
+          </div>
+          <div class="chat-actions-row">
+            <div class="chat-act-btn" onclick="shareLocation()">📍</div>
+            <div class="chat-act-btn" onclick="openSOSModal()">🚨</div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-list" id="messagesList">
+
+          <!-- System message -->
+          <div class="msg-group">
+            <div class="msg-row">
+              <div class="msg-ava-sm">🤖</div>
+              <div class="msg-bubble">
+                <div class="msg-sender">SafePulse Bot</div>
+                <div class="msg-text">¡Hola! Soy tu asistente de seguridad. Puedes enviarme fotos 📷, videos 🎥, audios 🎵, tu ubicación 📍 o hacer clic en <strong>🚨 SOS</strong> si hay una emergencia. ¿En qué puedo ayudarte?</div>
+                <div class="msg-time">08:30</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location message example -->
+          <div class="msg-group">
+            <div class="msg-row outgoing">
+              <div class="msg-ava-sm">👤</div>
+              <div class="location-bubble">
+                <div class="location-map-thumb">🗺️</div>
+                <div class="location-bubble-info">
+                  <div class="loc-title">📍 Ubicación compartida</div>
+                  <div class="loc-addr">Av. Principal 123, Zona Centro<br>Precisión: Alta · Ahora</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bot response -->
+          <div class="msg-group">
+            <div class="msg-row">
+              <div class="msg-ava-sm">🤖</div>
+              <div class="msg-bubble">
+                <div class="msg-sender">SafePulse Bot</div>
+                <div class="msg-text">✅ Ubicación recibida y registrada. Tu posición ha sido compartida con tus contactos de emergencia. ¿Necesitas asistencia adicional?</div>
+                <div class="msg-time">08:32</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audio example -->
+          <div class="msg-group">
+            <div class="msg-row outgoing">
+              <div class="msg-ava-sm">👤</div>
+              <div class="audio-bubble" style="background: rgba(21,101,192,0.3); border-color: rgba(21,101,192,0.4);">
+                <button class="audio-play-btn" onclick="playDemoAudio(this)">▶</button>
+                <div class="audio-waveform">
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                </div>
+                <div class="audio-duration">0:08</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bot response to audio -->
+          <div class="msg-group">
+            <div class="msg-row">
+              <div class="msg-ava-sm">🤖</div>
+              <div class="msg-bubble">
+                <div class="msg-sender">SafePulse Bot</div>
+                <div class="msg-text">🎵 Audio recibido (0:08). Procesando nota de voz... Si hay una emergencia activa, presiona 🚨 SOS para notificar a servicios de emergencia.</div>
+                <div class="msg-time">08:33</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Attachment preview bar -->
+        <div class="attachment-preview" id="attachmentPreview">
+          <div class="att-thumb" id="attThumb">📎</div>
+          <div class="att-info">
+            <div class="att-name" id="attName">archivo.jpg</div>
+            <div class="att-size" id="attSize">2.4 MB</div>
+          </div>
+          <div class="att-remove" onclick="clearAttachment()">✕</div>
+        </div>
+
+        <!-- Media buttons row + input -->
+        <div class="chat-input-bar">
+          <div class="media-btns-row">
+            <div class="media-btn" onclick="triggerFileInput('photo')">
+              📷<span>Foto</span>
+            </div>
+            <div class="media-btn" onclick="triggerFileInput('video')">
+              🎥<span>Video</span>
+            </div>
+            <div class="media-btn" onclick="triggerFileInput('audio')">
+              🎵<span>Audio</span>
+            </div>
+            <div class="media-btn loc-btn-media" onclick="shareLocation()">
+              📍<span>Ubicación</span>
+            </div>
+            <div class="media-btn emergency-btn-media" onclick="openSOSModal()">
+              🚨<span>SOS</span>
+            </div>
+            <div class="media-btn" onclick="switchTab('reports')">
+              📋<span>Reporte</span>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="chat-input-wrap">
+              <input class="chat-input-field" id="chatInput" type="text"
+                placeholder="Escribe un mensaje..." 
+                onkeydown="handleChatKey(event)">
+            </div>
+            <button class="send-btn" onclick="sendChatMessage()">➤</button>
+          </div>
+        </div>
+
+        <!-- Hidden file inputs -->
+        <input type="file" id="inputPhoto" class="hidden-input" accept="image/*" onchange="handleFileSelect(event,'photo')">
+        <input type="file" id="inputVideo" class="hidden-input" accept="video/*" onchange="handleFileSelect(event,'video')">
+        <input type="file" id="inputAudio" class="hidden-input" accept="audio/*" onchange="handleFileSelect(event,'audio')">
+
+      </div>
+    </div>
+
+    <!-- ▌ TAB 3: REPORTES ▌ -->
+    <div class="tab-panel" id="tab-reports">
+      <div class="reports-panel">
+
+        <!-- Reporter form -->
+        <div class="reporter-form-card">
+          <div class="form-card-header">
+            <div class="form-card-icon">🚨</div>
+            <div>
+              <div class="form-card-title">FORMULARIO DE REPORTE</div>
+              <div class="form-card-sub">Datos del reportante y emergencia</div>
+            </div>
+          </div>
+
+          <!-- Full name -->
+          <div class="form-field">
+            <label class="form-label">Nombre Completo</label>
+            <div class="form-input-wrap">
+              <span class="form-input-icon">👤</span>
+              <input class="form-input" type="text" id="rptNombre" placeholder="Ej: María González López">
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-field">
+            <label class="form-label">Número de Teléfono</label>
+            <div class="form-input-wrap">
+              <span class="form-input-icon">📱</span>
+              <input class="form-input" type="tel" id="rptTelefono" placeholder="Ej: +51 999 123 456">
+            </div>
+          </div>
+
+          <!-- ID / Document -->
+          <div class="form-field">
+            <label class="form-label">Documento / Identificación</label>
+            <div class="form-input-wrap">
+              <span class="form-input-icon">🪪</span>
+              <input class="form-input" type="text" id="rptDocumento" placeholder="DNI / Cédula / Pasaporte">
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="form-field">
+            <label class="form-label">Dirección / Ubicación del Incidente</label>
+            <div class="form-input-wrap">
+              <span class="form-input-icon">📍</span>
+              <input class="form-input" type="text" id="rptDireccion" placeholder="Calle, N°, Barrio, Ciudad">
+            </div>
+          </div>
+
+          <!-- Relationship -->
+          <div class="form-field">
+            <label class="form-label">Relación con la Emergencia</label>
+            <div class="form-select-wrap">
+              <span class="form-input-icon">🔗</span>
+              <select class="form-select" id="rptRelacion">
+                <option value="" disabled selected>Selecciona tu relación...</option>
+                <option value="victima">Víctima directa</option>
+                <option value="testigo">Testigo presencial</option>
+                <option value="familiar">Familiar de la víctima</option>
+                <option value="vecino">Vecino del área</option>
+                <option value="rescatista">Rescatista / Voluntario</option>
+                <option value="autoridad">Autoridad / Agente</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-field">
+            <label class="form-label">Descripción de la Emergencia</label>
+            <div class="form-textarea-wrap">
+              <textarea class="form-textarea" id="rptDescripcion"
+                placeholder="Describe lo que ocurrió con el mayor detalle posible: tipo de incidente, personas involucradas, estado de la situación..."></textarea>
+            </div>
+          </div>
+
+          <!-- Media attach -->
+          <label class="form-label" style="margin-top:4px;">Adjuntar Evidencia</label>
+          <div class="form-media-attach">
+            <div class="attach-btn" onclick="triggerReportFile('foto')">
+              <div class="attach-btn-icon">📷</div>
+              Foto
+            </div>
+            <div class="attach-btn" onclick="triggerReportFile('video')">
+              <div class="attach-btn-icon">🎥</div>
+              Video
+            </div>
+            <div class="attach-btn" onclick="triggerReportFile('audio')">
+              <div class="attach-btn-icon">🎵</div>
+              Audio
+            </div>
+          </div>
+          <input type="file" id="rptFileFoto" class="hidden-input" accept="image/*" onchange="handleReportFile(event)">
+          <input type="file" id="rptFileVideo" class="hidden-input" accept="video/*" onchange="handleReportFile(event)">
+          <input type="file" id="rptFileAudio" class="hidden-input" accept="audio/*" onchange="handleReportFile(event)">
+
+          <!-- Submit -->
+          <button class="submit-report-btn" onclick="submitReport()">
+            🚨 ENVIAR REPORTE DE EMERGENCIA
+          </button>
+        </div>
+
+        <!-- Report history -->
+        <div class="report-history-card">
+          <div class="form-card-header" style="margin-bottom:8px;">
+            <div class="form-card-icon" style="background:rgba(245,197,24,0.1);border-color:rgba(245,197,24,0.3);">📋</div>
+            <div>
+              <div class="form-card-title">HISTORIAL DE REPORTES</div>
+              <div class="form-card-sub">Últimos reportes enviados</div>
+            </div>
+          </div>
+
+          <div class="report-item">
+            <div class="report-status-dot s-atendido"></div>
+            <div class="report-item-info">
+              <div class="report-item-title">Robo a mano armada</div>
+              <div class="report-item-meta">📍 Av. Central 45 · Hace 2h · Testigo</div>
+            </div>
+            <div class="report-status-badge sb-atendido">Atendido</div>
+          </div>
+
+          <div class="report-item">
+            <div class="report-status-dot s-proceso"></div>
+            <div class="report-item-info">
+              <div class="report-item-title">Accidente de tránsito</div>
+              <div class="report-item-meta">📍 Jr. Bolívar 102 · Hace 4h · Vecino</div>
+            </div>
+            <div class="report-status-badge sb-proceso">En proceso</div>
+          </div>
+
+          <div class="report-item">
+            <div class="report-status-dot s-enviado"></div>
+            <div class="report-item-info">
+              <div class="report-item-title">Incendio en edificio</div>
+              <div class="report-item-meta">📍 Calle Los Pinos 8 · Hace 1d · Víctima</div>
+            </div>
+            <div class="report-status-badge sb-enviado">Enviado</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ▌ TAB 4: RESEÑAS ▌ -->
+    <div class="tab-panel" id="tab-reviews">
+      <div class="reviews-panel">
+
+        <div class="section-head">
+          <div class="section-title-text">⭐ SEGURIDAD POR ZONAS</div>
+          <div class="section-see-all" onclick="openReviewModal()">+ Agregar</div>
+        </div>
+
+        <div class="zone-card">
+          <div class="zone-card-header">
+            <div class="zone-card-icon zone-icon-red">⚠️</div>
+            <div class="zone-card-info">
+              <div class="zone-card-name">Centro Histórico</div>
+              <div class="zone-card-addr">Zona A · Av. Principal 1-200</div>
+            </div>
+            <div class="zone-risk-badge risk-alto">ALTO</div>
+          </div>
+          <div class="zone-card-footer">
+            <div>
+              <div class="stars-display" id="stars-z1">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+              </div>
+              <div class="zone-count-text" style="margin-top:3px;">2.1 · 47 reseñas</div>
+            </div>
+            <button class="rate-zone-btn" onclick="openReviewModal('Centro Histórico')">⭐ Calificar</button>
+          </div>
+        </div>
+
+        <div class="zone-card">
+          <div class="zone-card-header">
+            <div class="zone-card-icon zone-icon-orange">🟠</div>
+            <div class="zone-card-info">
+              <div class="zone-card-name">Mercado Municipal</div>
+              <div class="zone-card-addr">Zona B · Jr. Comercio 50-180</div>
+            </div>
+            <div class="zone-risk-badge risk-medio">MEDIO</div>
+          </div>
+          <div class="zone-card-footer">
+            <div>
+              <div class="stars-display">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+              </div>
+              <div class="zone-count-text" style="margin-top:3px;">3.2 · 31 reseñas</div>
+            </div>
+            <button class="rate-zone-btn" onclick="openReviewModal('Mercado Municipal')">⭐ Calificar</button>
+          </div>
+        </div>
+
+        <div class="zone-card">
+          <div class="zone-card-header">
+            <div class="zone-card-icon zone-icon-green">🟢</div>
+            <div class="zone-card-info">
+              <div class="zone-card-name">Parque Las Flores</div>
+              <div class="zone-card-addr">Zona C · Calle Sur 10-80</div>
+            </div>
+            <div class="zone-risk-badge risk-bajo">BAJO</div>
+          </div>
+          <div class="zone-card-footer">
+            <div>
+              <div class="stars-display">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+              </div>
+              <div class="zone-count-text" style="margin-top:3px;">4.8 · 89 reseñas</div>
+            </div>
+            <button class="rate-zone-btn" onclick="openReviewModal('Parque Las Flores')">⭐ Calificar</button>
+          </div>
+        </div>
+
+        <div class="zone-card">
+          <div class="zone-card-header">
+            <div class="zone-card-icon zone-icon-red">🔴</div>
+            <div class="zone-card-info">
+              <div class="zone-card-name">Estación de Buses</div>
+              <div class="zone-card-addr">Zona D · Terminal Norte</div>
+            </div>
+            <div class="zone-risk-badge risk-alto">ALTO</div>
+          </div>
+          <div class="zone-card-footer">
+            <div>
+              <div class="stars-display">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+              </div>
+              <div class="zone-count-text" style="margin-top:3px;">1.9 · 62 reseñas</div>
+            </div>
+            <button class="rate-zone-btn" onclick="openReviewModal('Estación de Buses')">⭐ Calificar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ▌ TAB 5: ALERTAS ▌ -->
+    <div class="tab-panel" id="tab-alerts">
+      <div class="alerts-panel">
+
+        <!-- Filters -->
+        <div class="alert-filters">
+          <div class="filter-chip active" onclick="filterAlerts(this,'all')">Todas</div>
+          <div class="filter-chip" onclick="filterAlerts(this,'sos')">🚨 SOS</div>
+          <div class="filter-chip" onclick="filterAlerts(this,'fire')">🔥 Incendio</div>
+          <div class="filter-chip" onclick="filterAlerts(this,'theft')">👊 Robo</div>
+          <div class="filter-chip" onclick="filterAlerts(this,'medical')">🚑 Médica</div>
+        </div>
+
+        <!-- Alert feed -->
+        <div class="alert-feed" id="alertFeed">
+
+          <div class="alert-item critical" data-type="sos">
+            <div class="alert-item-header">
+              <div class="alert-type-icon atype-sos">🚨</div>
+              <div class="alert-item-meta">
+                <div class="alert-item-type">⚡ EMERGENCIA SOS — CRÍTICO</div>
+                <div class="alert-item-desc">Persona reporta peligro inminente en la vía pública</div>
+                <div class="alert-item-time">⏱ Hace 2 min · Ana M. (Víctima)</div>
+              </div>
+              <div class="alert-priority-badge priority-alta">ALTA</div>
+            </div>
+            <div class="alert-item-loc">📍 Av. Central 45, Zona Centro · 320m de tu posición</div>
+            <div class="alert-item-actions">
+              <button class="alert-action-btn alert-action-respond" onclick="respondAlert(this)">🚨 Responder</button>
+              <button class="alert-action-btn alert-action-view" onclick="switchTab('chat')">💬 Chat</button>
+            </div>
+          </div>
+
+          <div class="alert-item" data-type="theft">
+            <div class="alert-item-header">
+              <div class="alert-type-icon atype-theft">👊</div>
+              <div class="alert-item-meta">
+                <div class="alert-item-type" style="color:#ffaa44;">ROBO / ASALTO</div>
+                <div class="alert-item-desc">Robo de celular en el mercado central</div>
+                <div class="alert-item-time">⏱ Hace 8 min · Luis T. (Testigo)</div>
+              </div>
+              <div class="alert-priority-badge priority-media">MEDIA</div>
+            </div>
+            <div class="alert-item-loc">📍 Jr. Comercio 102 · 780m de tu posición</div>
+            <div class="alert-item-actions">
+              <button class="alert-action-btn alert-action-respond" onclick="respondAlert(this)" style="background: var(--orange);">👮 Contactar Policía</button>
+              <button class="alert-action-btn alert-action-view" onclick="switchTab('chat')">💬 Chat</button>
+            </div>
+          </div>
+
+          <div class="alert-item" data-type="fire">
+            <div class="alert-item-header">
+              <div class="alert-type-icon atype-fire">🔥</div>
+              <div class="alert-item-meta">
+                <div class="alert-item-type" style="color:#ff7043;">INCENDIO</div>
+                <div class="alert-item-desc">Incendio en edificio de 3 pisos, 5 personas atrapadas</div>
+                <div class="alert-item-time">⏱ Hace 15 min · Carlos R. (Familiar)</div>
+              </div>
+              <div class="alert-priority-badge priority-alta">ALTA</div>
+            </div>
+            <div class="alert-item-loc">📍 Calle Los Pinos 8 · 1.2km de tu posición</div>
+            <div class="alert-item-actions">
+              <button class="alert-action-btn alert-action-respond" onclick="respondAlert(this)" style="background: #e64a19;">🚒 Llamar Bomberos</button>
+              <button class="alert-action-btn alert-action-view" onclick="switchTab('chat')">💬 Chat</button>
+            </div>
+          </div>
+
+          <div class="alert-item" data-type="medical">
+            <div class="alert-item-header">
+              <div class="alert-type-icon atype-medical">🚑</div>
+              <div class="alert-item-meta">
+                <div class="alert-item-type" style="color:#81c784;">EMERGENCIA MÉDICA</div>
+                <div class="alert-item-desc">Adulto mayor con desmayo, requiere ambulancia</div>
+                <div class="alert-item-time">⏱ Hace 22 min · María G. (Vecina)</div>
+              </div>
+              <div class="alert-priority-badge priority-media">MEDIA</div>
+            </div>
+            <div class="alert-item-loc">📍 Parque Central s/n · 2.1km de tu posición</div>
+            <div class="alert-item-actions">
+              <button class="alert-action-btn alert-action-respond" onclick="respondAlert(this)" style="background: var(--green);">🚑 Llamar Ambulancia</button>
+              <button class="alert-action-btn alert-action-view" onclick="switchTab('chat')">💬 Chat</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tabs-content -->
+
+  <!-- ══ BOTTOM NAVIGATION ══ -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Inicio</div>
+    </div>
+    <div class="nav-item" id="nav-chat" onclick="switchTab('chat')">
+      <div class="nav-icon">💬</div>
+      <div class="nav-label">Chat</div>
+    </div>
+    <div class="nav-item" id="nav-reports" onclick="switchTab('reports')">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label">Reportes</div>
+    </div>
+    <div class="nav-item" id="nav-reviews" onclick="switchTab('reviews')">
+      <div class="nav-icon">⭐</div>
+      <div class="nav-label">Reseñas</div>
+    </div>
+    <div class="nav-item" id="nav-alerts" onclick="switchTab('alerts')">
+      <div class="nav-icon">🔔<span class="nav-dot"></span></div>
+      <div class="nav-label">Alertas</div>
+    </div>
+  </div>
+
+  <!-- ══ REVIEWS MODAL ══ -->
+  <div class="modal-overlay" id="reviewModal" onclick="closeReviewModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-title-row">
+        <div class="modal-title" id="reviewModalTitle">Calificar Zona</div>
+        <div class="modal-close-btn" onclick="closeReviewModal()">✕</div>
+      </div>
+      <div>
+        <div class="modal-label">Calificación de Seguridad</div>
+        <div class="stars-interactive" id="starsInteractive">
+          <span class="star-i" data-v="1" onclick="rateStar(1)">★</span>
+          <span class="star-i" data-v="2" onclick="rateStar(2)">★</span>
+          <span class="star-i" data-v="3" onclick="rateStar(3)">★</span>
+          <span class="star-i" data-v="4" onclick="rateStar(4)">★</span>
+          <span class="star-i" data-v="5" onclick="rateStar(5)">★</span>
+        </div>
+      </div>
+      <div>
+        <div class="modal-label">Nivel de Riesgo</div>
+        <select class="modal-input" id="reviewRisk" style="cursor:pointer; appearance:none; background:#181c22;">
+          <option value="" disabled selected>Seleccionar nivel...</option>
+          <option value="bajo">🟢 Bajo — Zona tranquila</option>
+          <option value="medio">🟠 Medio — Precaución recomendada</option>
+          <option value="alto">🔴 Alto — Zona peligrosa</option>
+        </select>
+      </div>
+      <div>
+        <div class="modal-label">Comentario</div>
+        <textarea class="modal-input" id="reviewComment" rows="3"
+          placeholder="Describe tu experiencia en esta zona... ¿Qué tipo de incidentes has observado?"
+          style="resize:none; min-height:70px;"></textarea>
+      </div>
+      <div>
+        <div class="modal-label">Tu nombre (opcional)</div>
+        <input class="modal-input" type="text" id="reviewAuthor" placeholder="Anónimo">
+      </div>
+      <button class="modal-submit-btn" onclick="submitReview()">⭐ PUBLICAR RESEÑA</button>
+    </div>
+  </div>
+
+  <!-- ══ SOS REPORTER MODAL ══ -->
+  <div class="sos-modal-overlay" id="sosModal" onclick="closeSOSModal(event)">
+    <div class="sos-modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="sos-modal-header">
+        <div class="sos-modal-icon-wrap">🚨</div>
+        <div class="sos-modal-title">ACTIVAR EMERGENCIA</div>
+        <div class="sos-modal-sub">Completa tus datos para enviar la alerta correctamente. Tus contactos y servicios de emergencia serán notificados.</div>
+      </div>
+
+      <div class="sos-section-label">👤 Datos del Reportante</div>
+
+      <div class="sos-form-input-wrap">
+        <span>👤</span>
+        <input class="sos-form-input" type="text" id="sosNombre" placeholder="Nombre completo">
+      </div>
+      <div class="sos-form-input-wrap">
+        <span>📱</span>
+        <input class="sos-form-input" type="tel" id="sosTelefono" placeholder="Número de teléfono">
+      </div>
+      <div class="sos-form-input-wrap">
+        <span>🪪</span>
+        <input class="sos-form-input" type="text" id="sosDocumento" placeholder="DNI / Cédula / Documento">
+      </div>
+
+      <div class="sos-section-label">📍 Ubicación y Situación</div>
+
+      <div class="sos-form-input-wrap">
+        <span>📍</span>
+        <input class="sos-form-input" type="text" id="sosDireccion" placeholder="Dirección exacta del incidente">
+      </div>
+      <div class="sos-form-input-wrap">
+        <span>🔗</span>
+        <select class="sos-form-input" id="sosRelacion">
+          <option value="" disabled selected>Relación con la emergencia...</option>
+          <option value="victima">Víctima directa</option>
+          <option value="testigo">Testigo presencial</option>
+          <option value="familiar">Familiar de la víctima</option>
+          <option value="vecino">Vecino del área</option>
+          <option value="rescatista">Rescatista / Voluntario</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="sos-form-input-wrap" style="height:auto; padding: 10px 12px; align-items:flex-start;">
+        <span>⚠️</span>
+        <textarea class="sos-form-input" id="sosDescripcion" rows="2"
+          style="resize:none; padding-top:2px;"
+          placeholder="Describe brevemente la emergencia..."></textarea>
+      </div>
+
+      <button class="sos-confirm-btn" onclick="confirmSOS()">
+        🚨 ENVIAR ALERTA DE EMERGENCIA
+      </button>
+      <div class="sos-cancel-link" onclick="closeSOSModal()">Cancelar — No hay emergencia</div>
+    </div>
+  </div>
+
+  <!-- ══ EMERGENCY ACTIVATED OVERLAY ══ -->
+  <div class="emergency-overlay" id="emergencyOverlay">
+    <div class="ems-icon-ring">🚨</div>
+    <div class="ems-title">¡ALERTA ENVIADA!</div>
+    <div class="ems-sub">Tu ubicación está siendo compartida<br>en tiempo real. Ayuda está en camino.</div>
+    <div class="ems-status-row">
+      <div class="ems-status-item">
+        <div class="ems-status-dot"></div>
+        📍 Ubicación GPS transmitiendo...
+      </div>
+      <div class="ems-status-item">
+        <div class="ems-status-dot" style="animation-delay:0.3s;"></div>
+        👮 Notificando a servicios de emergencia...
+      </div>
+      <div class="ems-status-item">
+        <div class="ems-status-dot" style="animation-delay:0.6s;"></div>
+        📱 Alertando a tus contactos cercanos...
+      </div>
+    </div>
+    <button class="ems-dismiss-btn" onclick="dismissEmergency()">✕ CANCELAR ALERTA</button>
+  </div>
+
+  <!-- ══ TOAST CONTAINER ══ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</div><!-- /phone -->
+
+<script>
+/* ════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════ */
+let currentTab = 'home';
+
+function switchTab(tab) {
+  // Panels
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  // Nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-' + tab).classList.add('active');
+  currentTab = tab;
+
+  // Scroll chat to bottom when switching to chat
+  if (tab === 'chat') {
+    setTimeout(() => scrollChatToBottom(), 100);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   CLOCK
+════════════════════════════════════════════════════════ */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('statusTime').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+════════════════════════════════════════════════════════ */
+function showToast(msg, type='info', icon='ℹ️') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const cls = type === 'error' ? 'error-toast' : type === 'success' ? 'success-toast' : '';
+  toast.className = 'toast ' + cls;
+  toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-text">${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+/* ════════════════════════════════════════════════════════
+   AUDIO — SIREN GENERATOR (Web Audio API)
+════════════════════════════════════════════════════════ */
+let sirenInterval = null;
+let audioCtx = null;
+
+function startSiren() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let phase = 0;
+
+    function playTone(freq, duration, startTime) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, startTime + duration * 0.5);
+      osc.frequency.exponentialRampToValueAtTime(freq, startTime + duration);
+      gain.gain.setValueAtTime(0.8, startTime);
+      gain.gain.setValueAtTime(0.8, startTime + duration - 0.05);
+      gain.gain.linearRampToValueAtTime(0, startTime + duration);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    // Play repeating siren pattern
+    function schedulePattern() {
+      const now = audioCtx.currentTime;
+      playTone(880, 0.4, now);
+      playTone(440, 0.4, now + 0.45);
+      playTone(880, 0.4, now + 0.9);
+      playTone(440, 0.4, now + 1.35);
+    }
+    schedulePattern();
+    sirenInterval = setInterval(schedulePattern, 1800);
+
+    // Vibration
+    if (navigator.vibrate) {
+      navigator.vibrate([600, 200, 600, 200, 600, 200, 600]);
+    }
+  } catch(e) {
+    console.warn('Audio API not available:', e);
+  }
+}
+
+function stopSiren() {
+  if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
+  if (audioCtx) { try { audioCtx.close(); } catch(e){} audioCtx = null; }
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
+/* ════════════════════════════════════════════════════════
+   SOS FLOW
+════════════════════════════════════════════════════════ */
+function openSOSModal() {
+  document.getElementById('sosModal').classList.add('show');
+}
+
+function closeSOSModal(e) {
+  if (!e || e.target === document.getElementById('sosModal')) {
+    document.getElementById('sosModal').classList.remove('show');
+  }
+}
+
+function confirmSOS() {
+  const nombre = document.getElementById('sosNombre').value.trim();
+  if (!nombre) {
+    showToast('Por favor ingresa tu nombre completo', 'error', '⚠️');
+    document.getElementById('sosNombre').focus();
+    return;
+  }
+
+  // Close modal
+  document.getElementById('sosModal').classList.remove('show');
+
+  // Show emergency overlay
+  const overlay = document.getElementById('emergencyOverlay');
+  overlay.classList.add('show');
+
+  // Start siren
+  startSiren();
+
+  // Add to alerts feed
+  addAlertToFeed({
+    type: 'sos',
+    desc: `SOS por ${nombre || 'Usuario'}`,
+    relacion: document.getElementById('sosRelacion').value || 'Víctima',
+    loc: document.getElementById('sosDireccion').value || 'Ubicación GPS actual'
+  });
+
+  // Update badge counts
+  const badge = document.getElementById('alertBadge');
+  const count = parseInt(badge.textContent) + 1;
+  badge.textContent = count;
+  document.getElementById('bannerCount').textContent = count;
+  document.getElementById('homeBanner').querySelector('h3').textContent = count + ' ALERTAS ACTIVAS';
+
+  // Add message to chat
+  addSystemChatMessage(`🚨 ALERTA SOS ACTIVADA — ${nombre || 'Usuario'} reporta emergencia desde ${document.getElementById('sosDireccion').value || 'ubicación GPS'}. Servicios notificados.`);
+
+  showToast('¡Alerta enviada! Ayuda está en camino.', 'success', '✅');
+}
+
+function dismissEmergency() {
+  document.getElementById('emergencyOverlay').classList.remove('show');
+  stopSiren();
+  showToast('Alerta cancelada', 'info', 'ℹ️');
+}
+
+/* ════════════════════════════════════════════════════════
+   ALERT FEED
+════════════════════════════════════════════════════════ */
+function addAlertToFeed({ type, desc, relacion, loc }) {
+  const iconMap = { sos: '🚨', fire: '🔥', theft: '👊', medical: '🚑' };
+  const colorMap = { sos: 'atype-sos', fire: 'atype-fire', theft: 'atype-theft', medical: 'atype-medical' };
+  const icon = iconMap[type] || '🚨';
+  const cls = colorMap[type] || 'atype-sos';
+
+  const item = document.createElement('div');
+  item.className = 'alert-item critical';
+  item.dataset.type = type;
+  item.innerHTML = `
+    <div class="alert-item-header">
+      <div class="alert-type-icon ${cls}">${icon}</div>
+      <div class="alert-item-meta">
+        <div class="alert-item-type">⚡ EMERGENCIA NUEVA</div>
+        <div class="alert-item-desc">${desc}</div>
+        <div class="alert-item-time">⏱ Ahora mismo · ${relacion}</div>
+      </div>
+      <div class="alert-priority-badge priority-alta">ALTA</div>
+    </div>
+    <div class="alert-item-loc">📍 ${loc}</div>
+    <div class="alert-item-actions">
+      <button class="alert-action-btn alert-action-respond" onclick="respondAlert(this)">🚨 Responder</button>
+      <button class="alert-action-btn alert-action-view" onclick="switchTab('chat')">💬 Chat</button>
+    </div>`;
+  const feed = document.getElementById('alertFeed');
+  feed.insertBefore(item, feed.firstChild);
+}
+
+function respondAlert(btn) {
+  const item = btn.closest('.alert-item');
+  item.classList.remove('critical');
+  btn.textContent = '✅ Respondiendo...';
+  btn.disabled = true;
+  showToast('Respondiendo alerta — servicios notificados', 'success', '✅');
+}
+
+function filterAlerts(chip, type) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  document.querySelectorAll('.alert-item').forEach(item => {
+    item.style.display = (type === 'all' || item.dataset.type === type) ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════════════════════════
+   CHAT
+════════════════════════════════════════════════════════ */
+function scrollChatToBottom() {
+  const list = document.getElementById('messagesList');
+  list.scrollTop = list.scrollHeight;
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
+let pendingAttachment = null;
+
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  const list = document.getElementById('messagesList');
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+  if (text || pendingAttachment) {
+    // User message
+    const group = document.createElement('div');
+    group.className = 'msg-group';
+
+    if (pendingAttachment) {
+      const att = pendingAttachment;
+      let bubbleHTML = '';
+      if (att.type === 'photo') {
+        bubbleHTML = `<div class="msg-row outgoing">
+          <div class="msg-ava-sm">👤</div>
+          <div class="media-bubble">
+            <img src="${att.preview}" alt="foto" onerror="this.parentElement.innerHTML='<div style=\\'padding:20px;font-size:20px;text-align:center;\\'>📷 ${att.name}</div>'">
+            <div style="padding:4px 8px 6px;font-size:9px;color:var(--muted);text-align:right;">${timeStr}</div>
+          </div>
+        </div>`;
+      } else if (att.type === 'video') {
+        bubbleHTML = `<div class="msg-row outgoing">
+          <div class="msg-ava-sm">👤</div>
+          <div class="media-bubble">
+            <div class="media-bubble-overlay">▶ 🎥</div>
+            <div style="height:80px;background:#111;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);gap:6px;">🎥 ${att.name}</div>
+            <div style="padding:4px 8px 6px;font-size:9px;color:var(--muted);text-align:right;">${timeStr}</div>
+          </div>
+        </div>`;
+      } else if (att.type === 'audio') {
+        bubbleHTML = `<div class="msg-row outgoing">
+          <div class="msg-ava-sm">👤</div>
+          <div class="audio-bubble" style="background:rgba(21,101,192,0.3);border-color:rgba(21,101,192,0.4);">
+            <button class="audio-play-btn" onclick="playDemoAudio(this)">▶</button>
+            <div class="audio-waveform">
+              ${Array(7).fill('<div class="audio-bar"></div>').join('')}
+            </div>
+            <div class="audio-duration">${att.name}</div>
+          </div>
+        </div>`;
+      }
+      group.innerHTML = bubbleHTML;
+      clearAttachment();
+    }
+
+    if (text) {
+      const row = document.createElement('div');
+      row.className = 'msg-row outgoing';
+      row.innerHTML = `
+        <div class="msg-ava-sm">👤</div>
+        <div class="msg-bubble">
+          <div class="msg-text">${text}</div>
+          <div class="msg-time">${timeStr}</div>
+        </div>`;
+      group.appendChild(row);
+    }
+
+    list.appendChild(group);
+    input.value = '';
+    scrollChatToBottom();
+
+    // Bot auto-reply
+    setTimeout(() => {
+      botReply(text || 'archivo adjunto');
+    }, 1200);
+  }
+}
+
+function botReply(userText) {
+  const list = document.getElementById('messagesList');
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+  const replies = [
+    '✅ Mensaje recibido. ¿Necesitas que notifique a tus contactos de emergencia?',
+    '📡 Información registrada en el sistema SafePulse. ¿Hay algo más en lo que pueda ayudarte?',
+    '🛡️ Estoy monitoreando tu situación. Si hay peligro, presiona 🚨 SOS para activar la alerta inmediatamente.',
+    '📋 ¿Deseas hacer un reporte formal? Puedes ir a la pestaña 📋 Reportes para completar el formulario.',
+    '📍 ¿Quieres compartir tu ubicación actual con tus contactos de emergencia?'
+  ];
+  const reply = replies[Math.floor(Math.random() * replies.length)];
+
+  const group = document.createElement('div');
+  group.className = 'msg-group';
+  group.innerHTML = `
+    <div class="msg-row">
+      <div class="msg-ava-sm">🤖</div>
+      <div class="msg-bubble">
+        <div class="msg-sender">SafePulse Bot</div>
+        <div class="msg-text">${reply}</div>
+        <div class="msg-time">${timeStr}</div>
+      </div>
+    </div>`;
+  list.appendChild(group);
+  scrollChatToBottom();
+}
+
+function addSystemChatMessage(text) {
+  const list = document.getElementById('messagesList');
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const group = document.createElement('div');
+  group.className = 'msg-group';
+  group.innerHTML = `
+    <div class="msg-row">
+      <div class="msg-ava-sm">⚡</div>
+      <div class="msg-bubble system-bubble">
+        <div class="msg-sender" style="color:var(--red);">SISTEMA — EMERGENCIA</div>
+        <div class="msg-text" style="color:rgba(255,100,100,0.9);">${text}</div>
+        <div class="msg-time">${timeStr}</div>
+      </div>
+    </div>`;
+  list.appendChild(group);
+  scrollChatToBottom();
+}
+
+/* ════════════════════════════════════════════════════════
+   FILE / MULTIMEDIA HANDLING
+════════════════════════════════════════════════════════ */
+function triggerFileInput(type) {
+  const inputMap = { photo: 'inputPhoto', video: 'inputVideo', audio: 'inputAudio' };
+  document.getElementById(inputMap[type]).click();
+}
+
+function handleFileSelect(event, type) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+
+  const preview = document.getElementById('attachmentPreview');
+  const attThumb = document.getElementById('attThumb');
+  const attName = document.getElementById('attName');
+  const attSize = document.getElementById('attSize');
+
+  const sizeKB = (file.size / 1024).toFixed(0);
+  const sizeMB = (file.size / 1048576).toFixed(1);
+  const sizeStr = file.size > 1048576 ? sizeMB + ' MB' : sizeKB + ' KB';
+
+  attName.textContent = file.name;
+  attSize.textContent = sizeStr;
+
+  if (type === 'photo') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      attThumb.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+      pendingAttachment = { type: 'photo', name: file.name, preview: e.target.result };
+    };
+    reader.readAsDataURL(file);
+    attThumb.innerHTML = '📷';
+  } else if (type === 'video') {
+    attThumb.innerHTML = '🎥';
+    pendingAttachment = { type: 'video', name: file.name };
+  } else if (type === 'audio') {
+    attThumb.innerHTML = '🎵';
+    pendingAttachment = { type: 'audio', name: file.name };
+  }
+
+  preview.classList.add('show');
+}
+
+function clearAttachment() {
+  pendingAttachment = null;
+  document.getElementById('attachmentPreview').classList.remove('show');
+  document.getElementById('attThumb').innerHTML = '📎';
+}
+
+/* Report file inputs */
+function triggerReportFile(type) {
+  const map = { foto: 'rptFileFoto', video: 'rptFileVideo', audio: 'rptFileAudio' };
+  document.getElementById(map[type]).click();
+}
+function handleReportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  showToast(`Archivo adjuntado: ${file.name}`, 'success', '📎');
+}
+
+/* ════════════════════════════════════════════════════════
+   LOCATION SHARING
+════════════════════════════════════════════════════════ */
+function shareLocation() {
+  if (!navigator.geolocation) {
+    showToast('GPS no disponible en este dispositivo', 'error', '❌');
+    return;
+  }
+  showToast('Obteniendo ubicación GPS...', 'info', '📍');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(5);
+      const lng = pos.coords.longitude.toFixed(5);
+      addLocationBubble(lat, lng);
+      showToast('Ubicación compartida exitosamente', 'success', '✅');
+    },
+    (err) => {
+      // Simulate location for demo
+      addLocationBubble(-12.04318, -77.02824);
+      showToast('Ubicación de demostración compartida', 'info', '📍');
+    },
+    { timeout: 5000 }
+  );
+}
+
+function addLocationBubble(lat, lng) {
+  const list = document.getElementById('messagesList');
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const group = document.createElement('div');
+  group.className = 'msg-group';
+  group.innerHTML = `
+    <div class="msg-row outgoing">
+      <div class="msg-ava-sm">👤</div>
+      <div class="location-bubble">
+        <div class="location-map-thumb">🗺️</div>
+        <div class="location-bubble-info">
+          <div class="loc-title">📍 Ubicación en tiempo real</div>
+          <div class="loc-addr">Lat: ${lat}, Lng: ${lng}<br><span style="color:var(--green);font-size:8.5px;">● GPS Activo · ${timeStr}</span></div>
+        </div>
+      </div>
+    </div>`;
+  list.appendChild(group);
+  scrollChatToBottom();
+
+  // Bot reply
+  setTimeout(() => {
+    addBotLocationReply(lat, lng);
+  }, 1000);
+}
+
+function addBotLocationReply(lat, lng) {
+  const list = document.getElementById('messagesList');
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const group = document.createElement('div');
+  group.className = 'msg-group';
+  group.innerHTML = `
+    <div class="msg-row">
+      <div class="msg-ava-sm">🤖</div>
+      <div class="msg-bubble">
+        <div class="msg-sender">SafePulse Bot</div>
+        <div class="msg-text">✅ Ubicación GPS recibida y transmitida a tus contactos de emergencia. <strong>Coordenadas:</strong> ${lat}, ${lng} — Tu posición está siendo monitoreada.</div>
+        <div class="msg-time">${timeStr}</div>
+      </div>
+    </div>`;
+  list.appendChild(group);
+  scrollChatToBottom();
+}
+
+/* ════════════════════════════════════════════════════════
+   DEMO AUDIO PLAYBACK
+════════════════════════════════════════════════════════ */
+function playDemoAudio(btn) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 440;
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    osc.start(); osc.stop(ctx.currentTime + 0.8);
+    btn.textContent = '⏸';
+    setTimeout(() => { btn.textContent = '▶'; }, 900);
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════════════════════
+   REPORTS
+════════════════════════════════════════════════════════ */
+function submitReport() {
+  const nombre = document.getElementById('rptNombre').value.trim();
+  const telefono = document.getElementById('rptTelefono').value.trim();
+  const relacion = document.getElementById('rptRelacion').value;
+  const descripcion = document.getElementById('rptDescripcion').value.trim();
+
+  if (!nombre || !telefono || !relacion || !descripcion) {
+    showToast('Completa todos los campos obligatorios', 'error', '⚠️');
+    return;
+  }
+
+  // Add to history
+  const history = document.querySelector('.report-history-card');
+  const items = history.querySelectorAll('.report-item');
+  const newItem = document.createElement('div');
+  newItem.className = 'report-item';
+  newItem.innerHTML = `
+    <div class="report-status-dot s-enviado"></div>
+    <div class="report-item-info">
+      <div class="report-item-title">${descripcion.slice(0,35)}${descripcion.length > 35 ? '...' : ''}</div>
+      <div class="report-item-meta">📍 Ahora mismo · ${relacion}</div>
+    </div>
+    <div class="report-status-badge sb-enviado">Enviado</div>`;
+  history.querySelector('.report-history-card .form-card-header') ?
+    history.insertBefore(newItem, history.querySelectorAll('.report-item')[0]) :
+    history.appendChild(newItem);
+
+  // Clear form
+  ['rptNombre','rptTelefono','rptDocumento','rptDireccion','rptDescripcion'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('rptRelacion').selectedIndex = 0;
+
+  showToast('Reporte enviado exitosamente', 'success', '✅');
+
+  // Add alert
+  addAlertToFeed({ type:'theft', desc: descripcion.slice(0,50), relacion, loc: 'Reportado ahora' });
+  const badge = document.getElementById('alertBadge');
+  badge.textContent = parseInt(badge.textContent) + 1;
+}
+
+/* ════════════════════════════════════════════════════════
+   REVIEWS
+════════════════════════════════════════════════════════ */
+let currentRating = 0;
+let currentZoneName = '';
+
+function openReviewModal(zoneName) {
+  currentZoneName = zoneName || 'Nueva Zona';
+  document.getElementById('reviewModalTitle').textContent = 'Calificar: ' + currentZoneName;
+  currentRating = 0;
+  document.querySelectorAll('.star-i').forEach(s => s.classList.remove('active'));
+  document.getElementById('reviewComment').value = '';
+  document.getElementById('reviewRisk').selectedIndex = 0;
+  document.getElementById('reviewAuthor').value = '';
+  document.getElementById('reviewModal').classList.add('show');
+}
+
+function closeReviewModal(e) {
+  if (!e || e.target === document.getElementById('reviewModal')) {
+    document.getElementById('reviewModal').classList.remove('show');
+  }
+}
+
+function rateStar(n) {
+  currentRating = n;
+  document.querySelectorAll('.star-i').forEach((s, i) => {
+    s.classList.toggle('active', i < n);
+  });
+}
+
+function submitReview() {
+  if (!currentRating) { showToast('Selecciona una calificación', 'error', '⭐'); return; }
+  const comment = document.getElementById('reviewComment').value.trim();
+  if (!comment) { showToast('Escribe un comentario', 'error', '✍️'); return; }
+  document.getElementById('reviewModal').classList.remove('show');
+  showToast(`Reseña de "${currentZoneName}" publicada con ${currentRating}★`, 'success', '⭐');
+}
+
+/* ════════════════════════════════════════════════════════
+   CALL SERVICE (quick action)
+════════════════════════════════════════════════════════ */
+function callService(name, number) {
+  showToast(`Llamando a ${name} — ${number}`, 'info', '📞');
+  addSystemChatMessage(`📞 Iniciando llamada a ${name} (${number})... Por favor espera.`);
+  if(currentTab !== 'chat') switchTab('chat');
+}
+
+/* ════════════════════════════════════════════════════════
+   LOAD USER PROFILE FROM REGISTRATION
+════════════════════════════════════════════════════════ */
+let userProfile = null;
+
+function loadUserProfile() {
+  try {
+    const raw = localStorage.getItem('safepulse_user');
+    if (raw) {
+      userProfile = JSON.parse(raw);
+
+      // Pre-fill SOS form
+      if (userProfile.nombreCompleto) document.getElementById('sosNombre').value = userProfile.nombreCompleto;
+      if (userProfile.telefono) document.getElementById('sosTelefono').value = userProfile.telefono;
+      if (userProfile.dni) document.getElementById('sosDocumento').value = userProfile.dni;
+
+      // Pre-fill Report form
+      if (userProfile.nombreCompleto) document.getElementById('rptNombre').value = userProfile.nombreCompleto;
+      if (userProfile.telefono) document.getElementById('rptTelefono').value = userProfile.telefono;
+      if (userProfile.dni) document.getElementById('rptDocumento').value = userProfile.dni;
+
+      // Pre-fill review author
+      if (userProfile.nombreCompleto) document.getElementById('reviewAuthor').value = userProfile.nombreCompleto;
+
+      // Personalize the chatbot welcome
+      const firstName = (userProfile.nombres || '').split(' ')[0] || 'Usuario';
+      const welcomeMsg = document.querySelector('#messagesList .msg-group .msg-text');
+      if (welcomeMsg) {
+        welcomeMsg.innerHTML = `¡Hola <strong>${firstName}</strong>! 👋 Soy tu asistente de seguridad SafePulse. Puedes enviarme fotos 📷, videos 🎥, audios 🎵, tu ubicación 📍 o hacer clic en <strong>🚨 SOS</strong> si hay una emergencia. ¿En qué puedo ayudarte?`;
+      }
+
+      // Show user initials in header
+      const headerAvatar = document.querySelectorAll('.hdr-btn')[1];
+      if (headerAvatar && userProfile.nombres) {
+        const initials = (userProfile.nombres[0] || '') + (userProfile.apellidos ? userProfile.apellidos[0] : '');
+        headerAvatar.textContent = initials.toUpperCase();
+        headerAvatar.style.fontSize = '12px';
+        headerAvatar.style.fontWeight = '800';
+        headerAvatar.style.color = 'var(--gold)';
+        headerAvatar.title = userProfile.nombreCompleto;
+        headerAvatar.onclick = () => showToast(`Bienvenido, ${userProfile.nombreCompleto}`, 'info', '👤');
+      }
+    }
+  } catch(e) {
+    console.warn('No user profile found:', e);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   INITIAL FADE IN
+════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('phoneApp').style.opacity = '0';
+  document.getElementById('phoneApp').style.transition = 'opacity 0.5s ease';
+  setTimeout(() => {
+    document.getElementById('phoneApp').style.opacity = '1';
+  }, 80);
+
+  // Load user data from registration
+  loadUserProfile();
+
+  scrollChatToBottom();
+});
+</script>
+</body>
+</html>
+
